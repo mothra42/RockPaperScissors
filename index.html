@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Rock Paper Scissors</title>
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<!-- local css -->
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	<!-- Firebase -->
+	<script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+	<!-- jQuery -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- local javascript -->
+	<script type="text/javascript" src="assets/javascript/app.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="stage container text-center">
+					<div class="row">
+						<!-- Player One -->
+						<div class="col-xs-4 gamePanel" id="playerOne">
+							<h3 class="gameButtonOne" value="rock">Rock</h3>
+							<h3 class="gameButtonOne" value="paper">Paper</h3>
+							<h3 class="gameButtonOne" value="scissor">Scissor</h3>
+						</div>
+						<div class="col-xs-1">
+						</div>
+						<!-- Results -->
+						<div class="col-xs-2 gamePanel" id="result">
+						<h3>Play</h3>
+						</div>
+						<div class="col-xs-1">
+						</div>
+						<!-- Player Two -->
+						<div class="col-xs-4 gamePanel" id="playerTwo">
+							<h3 class="gameButtonTwo" value="rock">Rock</h3>
+							<h3 class="gameButtonTwo" value="paper">Paper</h3>
+							<h3 class="gameButtonTwo" value="scissor">Scissor</h3>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<!-- Where chat goes -->
+			<div class="col-xs-12">
+			</div>
+		</div>
+	</div>
+</body>
+</html>

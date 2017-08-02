@@ -1,0 +1,12 @@
+body {
+	box-sizing: border-box;
+}
+
+.gamePanel {
+	border: 3px solid red;
+	margin-top: 50px;
+}
+
+#result {
+	height: 154px;
+}

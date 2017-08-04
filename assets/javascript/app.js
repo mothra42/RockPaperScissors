@@ -9,38 +9,32 @@ var config =
 	messagingSenderId: "139235153403"
 };
 firebase.initializeApp(config);
-
+//references to database
 var database = firebase.database();
-var playerOne;
-var playerTwo;
+var playersRef = database.ref("players");
+var playerOneRef = playersRef.child('one');
+var playerTwoRef = playersRef.child('two');
 var playerOneChoice = "";
 var playerTwoChoice = "";
 var madeChoiceOne = false;
 var madeChoiceTwo = false;
-var playerOneWin = 0;
-var playerOneLoss = 0;
-var playerTwoWin = 0;
-var playerTwoLoss = 0;
-var keyOne;
-var keyTwo;
-// connectionsRef references a specific location in our database.
-// All of our connections will be stored in this directory.
+var playerOneWins = 0;
+var playerOneLosses = 0;
+var playerOneTies = 0;
+var playerTwoWins = 0;
+var playerTwoLosses = 0;
+var playerTwoTies = 0;
+var user;
 var connectionsRef = database.ref("/connections");
-
-// '.info/connected' is a special location provided by Firebase that is updated every time
-// the client's connection state changes.
-// '.info/connected' is a boolean value, true if the client is connected and false if they are not.
 var connectedRef = database.ref(".info/connected");
+var keyOne;
+var keyTwo; 
 
-//Constructor function that creates player object. 
-function Player (key, wins, losses)
-{
-	this.key = key;
-	this.wins = wins;
-	this.losses = losses
-}
+//These variables check if player one or player two exist.
+var playerOneExists;
+var playerTwoExists;
 
-//Function that holds rock paper scissors logic. 
+//Functions
 function whoWins(playerOne, playerTwo)
 {	
 	if (playerOne === "rock" && playerTwo === "scissor") 
@@ -73,45 +67,42 @@ function whoWins(playerOne, playerTwo)
 	}
 }
 
-//Need code that looks at what option both players chose and updates database
-//with those values. Keep players from making new choice. 
-$(document).ready(function() 
-{	
-	// When the client's connection state changes...
-	connectedRef.on("value", function(snap) 
-	{
-	  // If they are connected..
-	  if (snap.val()) 
-	  {
-	    // Add user to the connections list.
-	    var con = connectionsRef.push(true);
-		// Remove user from the connection list when they disconnect.
-	    con.onDisconnect().remove();
-	  }
-	});
-	
-	// When first loaded or when the connections list changes...
-	connectionsRef.on("value", function(snap) 
-	{
-		var arr = snap.val();
-		var arr2 = Object.keys(arr);
-		keyOne = arr2[0];
-		keyTwo = arr2[1];
-		if(arr2.length > 0)
-		playerOne = new Player(keyOne, playerOneWin, playerOneLoss);
-		if(arr2.length > 1)
-		playerTwo = new Player(keyTwo, playerTwoWin, playerTwoLoss);
-	});
+//LOOKS AT CONNECTIONS
+// When the client's connection state changes...
+connectedRef.on("value", function(snap) 
+{
+  // If they are connected..
+  if (snap.val()) 
+  {
+    // Add user to the connections list.
+    var con = connectionsRef.push(true);
+	// Remove user from the connection list when they disconnect.
+    con.onDisconnect().remove();
+  }
+});	
+// When first loaded or when the connections list changes...
+connectionsRef.on("value", function(snap) 
+{
+	//do something here to mess with child added....
 
-	$(".gameButtonOne").click(function()
+	var arr = snap.val();
+	var arr2 = Object.keys(arr);
+	keyOne = arr2[0];
+	keyTwo = arr2[1];
+});
+
+//sets playerOneExists and playerTwoExists depending on their existence in the database.
+
+//How players make choices
+$(".gameButtonOne").click(function()
 	{
-		if(!madeChoiceOne)
+		if(!madeChoiceOne && user === 1)
 		{
 			//set so player cannot change choice
 			madeChoiceOne = true;
 
 			playerOneChoice = $(this).attr("value");
-			database.ref().set(
+			database.ref("/choiceData").set(
 			{
 				playerOneChoice: $(this).attr("value"),
 				playerTwoChoice: playerTwoChoice,
@@ -119,16 +110,18 @@ $(document).ready(function()
 				madeChoiceOne: madeChoiceOne
 			});
 		}
+		console.log(playerOneChoice);
+		console.log("woop");
 	});
 	
 	$(".gameButtonTwo").click(function()
 	{
-		if(!madeChoiceTwo)
+		if(!madeChoiceTwo && user === 2)
 		{
 			madeChoiceTwo = true;
 
 			playerTwoChoice = $(this).attr("value");
-			database.ref().set(
+			database.ref("/choiceData").set(
 			{
 				playerOneChoice: playerOneChoice,
 				playerTwoChoice: $(this).attr("value"),
@@ -138,10 +131,64 @@ $(document).ready(function()
 		}
 	});
 
-//should have code that checks when database has been updated if both players have made a choice.
-//execute rock paper scissor logic then...
+$(document).ready(function() 
+{	
+	$(".nameButton").click(function(event)
+	{
+		//prevent submit feature
+		event.preventDefault();
+		//when player 1 connects
+		//add info to database
+		if(!playerOneExists)
+		{
+			user = 1;
+			localStorage.setItem("key", keyOne);
+			playerOneRef.push(
+			{
+				name: $("#nameInput").val(),
+				wins: playerOneWins,
+				losses: playerOneLosses,
+				ties: playerOneTies
+			});
+		}
+		//when player 2 connects
+		//add info to database
+		else if(playerOneExists && !playerTwoExists)
+		{
+			user = 2;
+			localStorage.setItem("key", keyTwo);
+			playerTwoRef.push({
+				name: $("#nameInput").val(),
+				wins: playerTwoWins,
+				losses: playerTwoLosses,
+				ties: playerTwoTies
+			});
+		}
+		//if player 1 disconnects and player 2 remains
+		//add info to database
+		else if(!playerOneExists && playerTwoExists)
+		{
+			user = 1;
+			playerOneRef.push(
+			{
+				name: $("#nameInput").val(),
+				wins: playerOneWins,
+				losses: playerOneLosses,
+				ties: playerOneTies
+			});
+			//add to disconnect checker thingy. 
+			//playerOneRef.onDisconnect().remove();
+			//playerTwoRef.onDisconnect().remove();
+		}
+	});
+
+	//sets playerOneExists and playerTwoExists depending on their existence in the database.
 	database.ref().on("value", function(snap)
 	{
+		playerOneExists = snap.child("players").child("one").exists();
+		playerTwoExists = snap.child("players").child("two").exists();
+		//console.log(user);
+
 		var data = snap.val();
 
 		if(snap.child("playerOneChoice").exists())
@@ -159,10 +206,13 @@ $(document).ready(function()
 		if(madeChoiceOne && madeChoiceTwo)
 		{
 			whoWins(playerOneChoice,playerTwoChoice);
-			madeChoiceOne = false;
-			madeChoiceTwo = false;
-			playerOneChoice = "";
-			playerTwoChoice = "";
+			database.ref("/choiceData").set(
+			{
+				madeChoiceOne: false,
+				madeChoiceTwo: false,
+				playerOneChoice: "different",
+				playerTwoChoice: "somethingElse"
+			});
 		}
 	});
 });
